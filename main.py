@@ -86,23 +86,36 @@ def load_dataset(csv_path):
     return X, y
 
 def main(): 
-    csv_path = input("Ingrese el path del dataset CSV: ") 
-    csv_path = f'CSV/{csv_path}'
-    X, y = load_dataset(csv_path)
+    
+    while op := input("¿Desea cargar un dataset CSV? (s/n): ").lower():
+        match op:
+            case "s":
+                try:
+                    csv_path = input("Ingrese el path del dataset CSV: ") 
+                    csv_path = f'CSV/{csv_path}'
+                    X, y = load_dataset(csv_path)
 
-    perceptron = Perceptron(log=True)
-    perceptron.entrenar(X, y, max_iteraciones=1000)
+                    perceptron = Perceptron(log=True)
+                    perceptron.entrenar(X, y, max_iteraciones=1000)
 
-    print("Entrenamiento completado.")
+                    print("Entrenamiento completado.")
 
-    # Probar predicciones
-    for muestra in X:
-        prediccion = perceptron.predecir(muestra)
-        print(f"Entrada: {muestra}, Predicción: {prediccion}")
+                    # Probar predicciones
+                    for muestra in X:
+                        prediccion = perceptron.predecir(muestra)
+                        print(f"Entrada: {muestra}, Predicción: {prediccion}")
 
-    # Graficar los resultados
-    graficar(X, y, perceptron)
-
-
+                    # Graficar los resultados
+                    graficar(X, y, perceptron)
+                except Exception as e:
+                    print(e)
+          
+                
+            case "n":
+                print("Saliendo...")
+                return
+            case _:
+                print("Opción inválida.")
+        
 if __name__ == '__main__':
     main()
