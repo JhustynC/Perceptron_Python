@@ -20,7 +20,7 @@ class Perceptron:
 
             for indice, muestra in enumerate(X):
                 
-                print(f"Indice: {indice}, Muestra: {muestra}")
+                # print(f"Indice: {indice}, Muestra: {muestra}")
                 
                 d_x = np.dot(muestra, self.pesos) + self.sesgo
                 y_predicho = self.funcion_activacion(d_x)
@@ -33,11 +33,11 @@ class Perceptron:
                     print(f"Sesgo (Theta): {self.sesgo}")
                     print(f"d(x) (Salida Lineal): {d_x}")
                     print(f"Predicho: {y_predicho}, Actual: {y[indice]}")
-                    print(f"Ajuste: {valor_real}")
+                    print(f"Ajuste (Valor real): {valor_real}")
                 
                 if y_predicho == y[indice]: continue
                 
-                #AJUSTES
+                #AJUSTES PESOS y SESGO (THETA)
                 self.pesos += valor_real * muestra
                 self.sesgo += valor_real
                 
@@ -49,11 +49,11 @@ class Perceptron:
 
             errores.append(error_total)
             if self.log:
-                print(f"Fin de la Iteración {iteracion+1}, Errores Totales: {error_total}\n")
+                print(f"\nFin de la Iteración {iteracion+1}, Errores Totales: {error_total}\n")
 
             if len(errores) > tolerancia and all(e == errores[-1] for e in errores[-tolerancia:]):
                 if self.log:
-                    print(f"Deteniendo temprano ya que el error no ha cambiado en las últimas {tolerancia} iteraciones.")
+                    print(f"!!Deteniendo temprano ya que el error no ha cambiado en las últimas {tolerancia} iteraciones.")
                 break
 
             if iteracion + 1 >= max_iteraciones:
