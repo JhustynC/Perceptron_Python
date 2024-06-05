@@ -10,11 +10,12 @@ class Perceptron:
 
     def entrenar(self, X, y, max_iteraciones=1000, tolerancia=3):
         num_muestras, num_caracteristicas = X.shape
-        self.pesos = np.zeros(num_caracteristicas)
-        self.sesgo = 0.05
+        # self.pesos = np.zeros(num_caracteristicas)
+        self.pesos = np.ones(num_caracteristicas)
+        self.sesgo = 0.5
         errores = []
 
-        for iteracion in range(max_iteraciones if max_iteraciones else float('inf')):
+        for iteracion in range(max_iteraciones):
             error_total = 0
 
             for indice, muestra in enumerate(X):
@@ -23,9 +24,8 @@ class Perceptron:
                 
                 d_x = np.dot(muestra, self.pesos) + self.sesgo
                 y_predicho = self.funcion_activacion(d_x)
-                ajuste = y[indice] - y_predicho
+                valor_real = y[indice] 
                 
-
                 if self.log:
                     print(f"\n---Iteración {iteracion+1}, Muestra {indice+1}---")
                     print(f"Pesos: {self.pesos}")
@@ -33,15 +33,19 @@ class Perceptron:
                     print(f"Sesgo (Theta): {self.sesgo}")
                     print(f"d(x) (Salida Lineal): {d_x}")
                     print(f"Predicho: {y_predicho}, Actual: {y[indice]}")
-                    print(f"Ajuste: {ajuste}")
-
-                self.pesos += ajuste * muestra
-                self.sesgo += ajuste
-                error_total += int(ajuste != 0.0)
-
+                    print(f"Ajuste: {valor_real}")
+                
+                if y_predicho == y[indice]: continue
+                
+                #AJUSTES
+                self.pesos += valor_real * muestra
+                self.sesgo += valor_real
+                
                 if self.log:
                     print(f"Pesos Actualizados: {self.pesos}")
                     print(f"Sesgo Actualizado: {self.sesgo}\n")
+                    
+                error_total += 1
 
             errores.append(error_total)
             if self.log:
@@ -60,7 +64,7 @@ class Perceptron:
         return self.funcion_activacion(d_x)
 
     def funcion_activacion(self, x):
-        return np.where(x >= 0, 1, 0)
+        return np.where(x <= 0, -1, 1)
     
 def graficar(X, y, perceptron):
     # Graficar puntos
@@ -100,7 +104,7 @@ def main():
                     X, y = load_dataset(csv_path)
 
                     perceptron = Perceptron(log=True)
-                    perceptron.entrenar(X, y, max_iteraciones=1000, tolerancia=3)
+                    perceptron.entrenar(X, y, max_iteraciones=100, tolerancia=3)
 
                     print("Entrenamiento completado.")
 
