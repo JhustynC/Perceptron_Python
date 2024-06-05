@@ -24,9 +24,10 @@ class Perceptron:
                 d_x = np.dot(muestra, self.pesos) + self.sesgo
                 y_predicho = self.funcion_activacion(d_x)
                 ajuste = y[indice] - y_predicho
+                
 
                 if self.log:
-                    print(f"Iteración {iteracion+1}, Muestra {indice+1}")
+                    print(f"\n---Iteración {iteracion+1}, Muestra {indice+1}---")
                     print(f"Pesos: {self.pesos}")
                     print(f"Muestra: {muestra}")
                     print(f"Sesgo (Theta): {self.sesgo}")
