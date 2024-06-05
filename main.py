@@ -11,7 +11,7 @@ class Perceptron:
     def entrenar(self, X, y, max_iteraciones=1000, tolerancia=3):
         num_muestras, num_caracteristicas = X.shape
         self.pesos = np.zeros(num_caracteristicas)
-        self.sesgo = 0.5
+        self.sesgo = 0.05
         errores = []
 
         for iteracion in range(max_iteraciones if max_iteraciones else float('inf')):
@@ -22,7 +22,7 @@ class Perceptron:
                 print(f"Indice: {indice}, Muestra: {muestra}")
                 
                 d_x = np.dot(muestra, self.pesos) + self.sesgo
-                y_predicho = self._funcion_activacion(d_x)
+                y_predicho = self.funcion_activacion(d_x)
                 ajuste = y[indice] - y_predicho
 
                 if self.log:
@@ -56,9 +56,9 @@ class Perceptron:
 
     def predecir(self, X):
         d_x = np.dot(X, self.pesos) + self.sesgo
-        return self._funcion_activacion(d_x)
+        return self.funcion_activacion(d_x)
 
-    def _funcion_activacion(self, x):
+    def funcion_activacion(self, x):
         return np.where(x >= 0, 1, 0)
     
 def graficar(X, y, perceptron):
