@@ -11,11 +11,6 @@ class Perceptron:
         self.error_total = 0
         self.errores = []
         
-        try:
-            self.cargar_pesos()
-        except Exception as e:
-            print(f'\n{e}')
-            
     def entrenar(self, X, y, max_iteraciones=10, tolerancia=3):
         num_muestras, num_caracteristicas = X.shape
         self.errores = []
@@ -84,6 +79,7 @@ class Perceptron:
         pesos = open('pesos.dat','rb')
         self.pesos = pk.load(pesos)
         pesos.close()
+        print('\n---Carga completa---')
         
 
 def load_dataset(csv_path):
@@ -96,11 +92,12 @@ def main():
     
     op = 0
     perceptron = Perceptron([0.840, 0.394, 0.783], 0, 0.3)
-    while op!=3:
+    while op!=4:
         print('\n------Adeline------')
         print('1) Entrenar red')
         print('2) Clasificar muestra')
-        print('3) Salir ')
+        print('3) Cargar pesos')
+        print('4) Salir ')
         try: 
             op = int(input("opcion: "))
         except Exception as e:
@@ -128,10 +125,12 @@ def main():
                 print(f'Prediccion: {y}')
 
             case 3:
+                perceptron.cargar_pesos()
+                
+            case 4:
                 print("Saliendo...")
                 break
             case _:
                 print("Opción inválida.")
         
-
 main()
