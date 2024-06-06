@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 class Perceptron:
     def __init__(self, log=False):
@@ -11,7 +12,8 @@ class Perceptron:
     def entrenar(self, X, y, max_iteraciones=1000, tolerancia=3):
         num_muestras, num_caracteristicas = X.shape
         # self.pesos = np.zeros(num_caracteristicas)
-        self.pesos = np.ones(num_caracteristicas)
+        # self.pesos = np.ones(num_caracteristicas)
+        self.pesos = np.full(num_caracteristicas,0.5)
         self.sesgo = 0.5
         errores = []
 
@@ -67,23 +69,27 @@ class Perceptron:
         return np.where(x <= 0, -1, 1)
     
 def graficar(X, y, perceptron):
+    # Reducir las dimensiones a 2D usando PCA
+    pca = PCA(n_components=2)
+    X_reducido = pca.fit_transform(X)
+
     # Graficar puntos
     for clase in np.unique(y):
-        plt.scatter(X[y == clase][:, 0], X[y == clase][:, 1], label=f"Clase {clase}")
-    
+        plt.scatter(X_reducido[y == clase][:, 0], X_reducido[y == clase][:, 1], label=f"Clase {clase}")
+
     # Calcular los límites de la gráfica
-    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    x_min, x_max = X_reducido[:, 0].min() - 1, X_reducido[:, 0].max() + 1
+    y_min, y_max = X_reducido[:, 1].min() - 1, X_reducido[:, 1].max() + 1
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
-    Z = perceptron.predecir(np.c_[xx.ravel(), yy.ravel()])
+    Z = perceptron.predecir(pca.inverse_transform(np.c_[xx.ravel(), yy.ravel()]))
     Z = Z.reshape(xx.shape)
-    
+
     # Graficar la línea de decisión
     plt.contourf(xx, yy, Z, alpha=0.1)
     plt.plot([], [], ' ', label=f"Pesos: {perceptron.pesos}, Sesgo: {perceptron.sesgo}")
-    plt.title("Perceptrón - Muestras y Función de Activación")
-    plt.xlabel("Característica 1")
-    plt.ylabel("Característica 2")
+    plt.title("Perceptrón - Muestras y Función de Activación (PCA Reducido)")
+    plt.xlabel("Componente Principal 1")
+    plt.ylabel("Componente Principal 2")
     plt.legend()
     plt.show()
 
@@ -107,6 +113,8 @@ def main():
                     perceptron.entrenar(X, y, max_iteraciones=100, tolerancia=3)
 
                     print("Entrenamiento completado.")
+                    
+                    print(perceptron.pesos)
 
                     # Probar predicciones
                     for muestra in X:
@@ -115,6 +123,7 @@ def main():
 
                     # Graficar los resultados
                     graficar(X, y, perceptron)
+                    
                 except Exception as e:
                     print(e)
           
