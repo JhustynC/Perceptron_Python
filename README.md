@@ -6,6 +6,6 @@
 
     > pip install -r requirements.txt
 
-# Crear lista de requerimientos
+# Actualizar lista de requerimientos
 
     > pip freeze > requirements.txt
