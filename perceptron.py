@@ -11,8 +11,6 @@ class Perceptron:
 
     def entrenar(self, X, y, max_iteraciones=1000, tolerancia=3):
         num_muestras, num_caracteristicas = X.shape
-        # self.pesos = np.zeros(num_caracteristicas)
-        # self.pesos = np.ones(num_caracteristicas)
         self.pesos = np.full(num_caracteristicas,0.5)
         self.sesgo = 0.5
         errores = []

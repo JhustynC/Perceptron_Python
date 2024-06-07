@@ -3,60 +3,64 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pickle as pk
 
-class Perceptron:
-    def __init__(self, pesos, sesgo, factor):
-        self.pesos = np.array(pesos)
+class Adaline:
+    def __init__(self, sesgo, factor):
+        self.pesos = np.array
         self.sesgo = sesgo
-        self.factor_aprendeizaje = factor
-        self.error_total = 0
+        self.factor_aprendizaje = factor
+        self.error_total_modelo = 0
+        self.errores = []
+    
+    #? Se pude agregar tolerancia_error=1e-5
+    def entrenar(self, X, y, max_iteraciones, estabilizacion_error):
+        _, num_caracteristicas = X.shape
+        self.pesos = np.random.rand(num_caracteristicas)
         self.errores = []
         
-    def entrenar(self, X, y, max_iteraciones=10, tolerancia=3):
-        num_muestras, num_caracteristicas = X.shape
-        self.errores = []
-        self.error_total = 0
-        for indice_X, muestra in enumerate(X):
-
-            y_d = np.dot(self.pesos, muestra) + self.sesgo
-
-            error =  np.abs(y[indice_X] - y_d)
-            self.errores.append(error)
+        for iteracion in range(max_iteraciones):
+            error_total_iteracion = 0
+            print(f'\n===== Iteración {iteracion + 1} =====')
             
-            self.pesos = self.pesos + self.factor_aprendeizaje * error * muestra
+            for indice_X, muestra in enumerate(X):
+                y_d = np.dot(self.pesos, muestra) + self.sesgo
+                error = y[indice_X] - y_d
+                self.pesos += self.factor_aprendizaje * error * muestra
+                error_total_iteracion += error
 
-            self.error_total += error
+                print(f'\n--- Iteración {iteracion + 1} -> Patrón {muestra}: {y[indice_X]} ---')
+                print(f'Valor de y: {round(y_d, 4)}')
+                print(f'Error: {round(error, 4)}')
+                print(f'Pesos: {self.pesos}')
+                print(f'Error total: {round(error_total_iteracion, 4)}')
 
-            print(f'\n---Interacion {indice_X + 1} -> Patron {X[indice_X]}:{y[indice_X]}---')
-            print(f'Valor de y: {round(y_d,4)}')
-            print(f'Error: {round(error, 4)}')
-            print(f'Pesos: {self.pesos}')
-            print(f'Error total: {round(self.error_total,4)}')
+            self.errores.append(error_total_iteracion)
+
+            if (len(self.errores) > estabilizacion_error and 
+                all(e == self.errores[-1] for e in self.errores[-estabilizacion_error:])):
+                print(f"\n!! Deteniendo temprano ya que el error no ha cambiado en las últimas {estabilizacion_error} iteraciones.")
+                break
             
-            #! Criterios de parada
-            if  indice_X + 1 == num_muestras:
-                print('\nFinalizado por cantidad de muestras')
-                break
+            # if abs(error_total_iteracion) < tolerancia_error:
+            #     print(f"\n!! Deteniendo temprano ya que el error total ({round(error_total_iteracion, 4)}) es menor que la tolerancia de error ({tolerancia_error}).")
+            #     break
 
-            if len(self.errores) > tolerancia and all(e == self.errores[-1] for e in self.errores[-tolerancia:]):
-                print(f"\n!!Deteniendo temprano ya que el error no ha cambiado en las últimas {tolerancia} iteraciones.")
-                break
-
-            if indice_X + 1 >= max_iteraciones:
-                print('\nMaximo de iteraciones alcanzado')
+            if iteracion + 1 >= max_iteraciones:
+                print('\nMáximo de iteraciones alcanzado')
                 break
         
+        self.error_total_modelo = sum(self.errores)
         self.guardar_pesos()
     
     def graficar_errores(self):
         plt.figure(figsize=(10, 6))
-        plt.plot(self.errores, marker='o', linestyle='--', color='b', label=f"Error total: {round(self.error_total,2)}")
+        plt.plot(self.errores, marker='o', linestyle='solid', color='b', label=f"Error total: {round(self.error_total_modelo,2)} \nPesos: {self.pesos}")
         plt.title('Errores durante el entrenamiento de la red')
         plt.xlabel('Iteración')
         plt.ylabel('Error')
 
         # Anotaciones para cada punto
-        for i, error in enumerate(self.errores):
-            plt.annotate(f'{round(error, 2)}', (i, error), textcoords="offset points", xytext=(0, 10), ha='center')
+        plt.annotate(f'{round(self.errores[0], 2)}', (0, self.errores[0]), textcoords="offset points", xytext=(0, 10), ha='center')
+        plt.annotate(f'{round(self.errores[-1], 2)}', (len(self.errores) - 1, self.errores[-1]), textcoords="offset points", xytext=(0, 10), ha='center')
 
         plt.legend()
         plt.grid(True)
@@ -76,11 +80,13 @@ class Perceptron:
         pesos.close()
 
     def cargar_pesos(self):
-        pesos = open('pesos.dat','rb')
-        self.pesos = pk.load(pesos)
-        pesos.close()
-        print('\n---Carga completa---')
-        
+        try:
+            pesos = open('pesos.dat','rb')
+            self.pesos = pk.load(pesos)
+            pesos.close()
+            print('\n---Carga completa---')
+        except Exception as e:
+            print(e)
 
 def load_dataset(csv_path):
     data = pd.read_csv(csv_path)
@@ -91,7 +97,7 @@ def load_dataset(csv_path):
 def main(): 
     
     op = 0
-    perceptron = Perceptron([0.840, 0.394, 0.783], 0, 0.3)
+    adaline = Adaline(0, 0.3)
     while op!=4:
         print('\n------Adeline------')
         print('1) Entrenar red')
@@ -110,23 +116,29 @@ def main():
                     csv_path = f'CSV/{csv_path}'
                     X, y = load_dataset(csv_path)
  
-                    perceptron.entrenar(X, y, max_iteraciones=7, tolerancia=3)
+                    adaline.entrenar(X, y, max_iteraciones=1000, estabilizacion_error=50)
 
                     print("\nEntrenamiento completado.")
                     # print(perceptron.errores)
                     print("\n---Grafica de errores---")
-                    perceptron.graficar_errores()
+                    adaline.graficar_errores()
                     
                 except Exception as e:
                     print(e)
-            case 2:     
-                print('\n---Clasificar muestras---')
-                y = perceptron.predecir([1,0,1])
-                print(f'Prediccion: {y}')
-
+            case 2:   
+                try:  
+                    print('\n---Clasificar muestras---')
+                    csv_path = input("Ingrese el path del dataset CSV: ") 
+                    csv_path = f'CSV/{csv_path}'
+                    X, y = load_dataset(csv_path)
+                    
+                    for indice, muestra in enumerate(X):
+                        clasificacion = adaline.predecir(muestra)
+                        print(f'Muestra: {muestra} --> Valor Esperado:{y[indice]} -> Clasificacion: {round(clasificacion,2)}')
+                except Exception as e:
+                    print(e)
             case 3:
-                perceptron.cargar_pesos()
-                
+                adaline.cargar_pesos()
             case 4:
                 print("Saliendo...")
                 break
